@@ -2,6 +2,10 @@
 
 A tool for exploring and testing Kong API Gateway routes directly from the Kong database.
 
+## Preview
+
+![Preview](https://raw.githubusercontent.com/sahapranta/kong-check/refs/heads/main/assets/demo.gif)
+
 ## Features
 
 - List all routes and services in Kong with colorized output
