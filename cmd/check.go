@@ -10,23 +10,33 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/sahapranta/kong-check/config"
 	"github.com/sahapranta/kong-check/db"
 	"github.com/sahapranta/kong-check/models"
 )
 
-func CheckRoutes(conf *config.Config, customPath string, verbose bool, timeout int, checkAll bool, serviceNames string, methods string) {
+type CheckService struct {
+	*db.App
+}
+
+func NewCheckService(app *db.App) *CheckService {
+	return &CheckService{
+		App: app,
+	}
+}
+
+func (app *CheckService) CheckRoutes(customPath string, verbose bool, timeout int, checkAll bool, serviceNames string, methods string) {
 	var routes []models.Route
 	var err error
+	conf := app.Conf
 
 	if checkAll {
-		routes, err = db.GetAllRoutes(conf)
+		routes, err = app.GetAllRoutes()
 		if err != nil {
 			log.Fatalf("Failed to query routes: %v", err)
 		}
 	} else if serviceNames != "" {
 		services := strings.Split(serviceNames, ",")
-		routes, err = db.GetRoutesByServiceNames(conf, services)
+		routes, err = app.GetRoutesByServiceNames(services)
 		if err != nil {
 			log.Fatalf("Failed to query routes for services %s: %v", serviceNames, err)
 		}

@@ -6,12 +6,21 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/sahapranta/kong-check/config"
 	"github.com/sahapranta/kong-check/db"
 )
 
-func ListRoutes(conf *config.Config, showHeaders bool, showMethods bool) {
-	routes, err := db.GetAllRoutes(conf)
+type ListService struct {
+	*db.App
+}
+
+func NewListService(app *db.App) *ListService {
+	return &ListService{
+		App: app,
+	}
+}
+
+func (app *ListService) ListRoutes(showHeaders bool, showMethods bool) {
+	routes, err := app.GetAllRoutes()
 	if err != nil {
 		log.Fatalf("Failed to query routes: %v", err)
 	}

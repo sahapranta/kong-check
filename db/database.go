@@ -10,6 +10,27 @@ import (
 	"github.com/sahapranta/kong-check/utils"
 )
 
+type App struct {
+	DB   *sql.DB
+	Conf *config.Config
+}
+
+func NewApp(conf *config.Config) (*App, error) {
+	db, err := sql.Open("postgres", conf.DatabaseURL)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	defer db.Close()
+
+	return &App{DB: db}, nil
+}
+
 func GetConnection(conf *config.Config) (*sql.DB, error) {
 	db, err := sql.Open("postgres", conf.DatabaseURL)
 	if err != nil {
@@ -24,12 +45,8 @@ func GetConnection(conf *config.Config) (*sql.DB, error) {
 	return db, nil
 }
 
-func GetAllRoutes(conf *config.Config) ([]models.Route, error) {
-	db, err := GetConnection(conf)
-	if err != nil {
-		return nil, err
-	}
-	defer db.Close()
+func (app *App) GetAllRoutes() ([]models.Route, error) {
+	db := app.DB
 
 	query := `
 		SELECT 
@@ -95,12 +112,8 @@ func GetAllRoutes(conf *config.Config) ([]models.Route, error) {
 	return routes, nil
 }
 
-func GetRoutesByServiceNames(conf *config.Config, serviceNames []string) ([]models.Route, error) {
-	db, err := GetConnection(conf)
-	if err != nil {
-		return nil, err
-	}
-	defer db.Close()
+func (app *App) GetRoutesByServiceNames(serviceNames []string) ([]models.Route, error) {
+	db := app.DB
 
 	// Build query with placeholders for services
 	query := `
